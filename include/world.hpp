@@ -1,8 +1,7 @@
 /*
-* File name:        ex_points_extraction.h
+* File name:        world.hpp
 * Author:           Noam Hasson
-* Description:      This file handle the points extraction functionality of the drone, which enable the operator to send 
-*                   a location that is observed by the drone for external use. 
+* Description:      
 */
 #pragma once
 

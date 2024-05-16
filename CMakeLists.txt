@@ -39,7 +39,7 @@ file(GLOB sources src/*.cpp)
 include_directories(include)
 include_directories(/usr/include/python3.8)
 
-add_executable(plotRobot src/plotRobot.cpp src/world.cpp src/robot.cpp include/world.hpp include/robot.hpp)
+add_executable(plotRobot src/plotRobot.cpp src/world.cpp src/robot.cpp include/world.hpp include/robot.hpp include/parameters.hpp)
 #target_include_directories(executableName ./include)
 
 target_link_libraries(plotRobot
