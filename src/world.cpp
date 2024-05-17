@@ -17,10 +17,10 @@ void World::plotWorld(void) {
     // Components of the heading vector
 
     for (std::vector<Robot>::iterator it = this->robots.begin(); it != this->robots.end(); ++it) {
-        x.push_back(it->x);
-        y.push_back(it->y);
-        u.push_back(std::cos(it->theta));
-        v.push_back(std::sin(it->theta));
+        x.push_back(it->stateGT(0));
+        y.push_back(it->stateGT(1));
+        u.push_back(std::cos(it->stateGT(2)));
+        v.push_back(std::sin(it->stateGT(2)));
     }
 
     // Plot the robot's position and heading using a quiver plot

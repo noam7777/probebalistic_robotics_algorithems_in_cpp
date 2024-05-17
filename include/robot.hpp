@@ -12,24 +12,32 @@
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
+#include "parameters.hpp"
 
 //=====================================================================================================================
 // TYPE DEFINITION
 //=====================================================================================================================
-struct ControlSignal
-{
-    float linearVel;
-    float angularVel;
-    ControlSignal(float linearVel_, float angularVel_) : linearVel(linearVel_), angularVel(angularVel_){}
-};
-
 class Robot {
-    
     public:
-    float x;
-    float y;
-    float theta;
-    Robot(float initial_x, float initial_y, float initial_theta)
-        : x(initial_x), y(initial_y), theta(initial_theta) {}
-    void step(ControlSignal u);
+
+    class Ekf {
+        Eigen::Vector3f state;
+        Eigen::Matrix3d covMatrix;
+        Eigen::Matrix3d processNoise;
+        Eigen::Matrix3d measurementNoise;
+        void init(Eigen::Vector3f initialState,
+                  float initalCovariancesXY, 
+                  float initalCovariancesTheta, 
+                  float processNoiseXY,
+                  float processNoiseTheta,
+                  float measurementNoiseXY,
+                  float measurementNoiseTheta);
+        void prediction(Eigen::Vector2f u);
+    };
+
+    public:
+    Eigen::Vector3f stateGT;
+    Robot(Eigen::Vector3f initialState)
+        : stateGT(initialState) {}
+    void step(Eigen::Vector2f u);
     };
