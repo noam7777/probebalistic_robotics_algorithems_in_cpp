@@ -19,14 +19,15 @@
 
 class World {
     private:
-    int width = 10;
-    int height = 10;
+    int width = WORLD_WIDTH;
+    int height = WORLD_HEIGHT;
     std::vector<Robot> robots;
 
     public:
-    void plotWorld(void);
-    void addRobotToWorld(Robot robot);
+    void plotWorld(bool plotGt, bool PlotEkfEstimation);
+    void addRobotGroundTruth(Robot robot);
     void cleanWorld(void);
+    Eigen::Vector3f getMeasurement(Robot robot);
 };
 
 //=====================================================================================================================

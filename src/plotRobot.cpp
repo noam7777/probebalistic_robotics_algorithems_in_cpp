@@ -9,14 +9,19 @@ int main()
     initialState << 4.0f, 4.0f, 0.0f;
     Robot rob1 = Robot(initialState);
     
-    world.addRobotToWorld(rob1);
+    rob1.ekf.init(initialState);
+    world.addRobotGroundTruth(rob1);
 
     for (int i = 0; i<5 ;i++) {
         Eigen::Vector2f u;
-        u << 1.0f, 0.0f;
+        u << 3.0f, 0.2f;
         rob1.step(u);
-        world.addRobotToWorld(rob1);
+        u << 4.0f, 0.0f;
+        rob1.ekf.prediction(u);
+        Eigen::Vector3f measurement = world.getMeasurement(rob1);
+        rob1.ekf.update(measurement);
+        world.addRobotGroundTruth(rob1);
     }
-    world.plotWorld();
+    world.plotWorld(true, true);
     return 0;
 }
