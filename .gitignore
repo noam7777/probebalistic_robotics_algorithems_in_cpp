@@ -6,5 +6,7 @@
 
 # Ignore the build directory
 /build/
+/install/
+/log/
 
 .vscode/
