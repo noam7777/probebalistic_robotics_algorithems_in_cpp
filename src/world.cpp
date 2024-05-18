@@ -30,22 +30,43 @@ static inline void plotEllipse(float x, float y, const Eigen::Matrix2f& cov) {
     plt::plot(ellipse_x, ellipse_y, "r-");
 }
 
+std::vector<float> normalize(const std::vector<float>& values) {
+    float minVal = *std::min_element(values.begin(), values.end());
+    float maxVal = *std::max_element(values.begin(), values.end());
+    std::vector<float> normalizedValues;
+    for (float value : values) {
+        normalizedValues.push_back((value - minVal) / (maxVal - minVal));
+    }
+    return normalizedValues;
+}
+
+std::string vectorToPythonListString(const std::vector<std::string>& vec) {
+    std::string result = "[";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        result += "'" + vec[i] + "'";
+        if (i != vec.size() - 1) {
+            result += ", ";
+        }
+    }
+    result += "]";
+    return result;
+}
+
 void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation) {
 
     if (plotGt) {
         // Plot all the robots:
-        std::vector<double> x;
-        std::vector<double> y;
-        std::vector<double> u;
-        std::vector<double> v;
+        std::vector<float> x;
+        std::vector<float> y;
+        std::vector<float> u;
+        std::vector<float> v;
 
         // Components of the heading vector
-
-        for (std::vector<Robot>::iterator it = this->robots.begin(); it != this->robots.end(); ++it) {
-            x.push_back(it->stateGT(0));
-            y.push_back(it->stateGT(1));
-            u.push_back(std::cos(it->stateGT(2)));
-            v.push_back(std::sin(it->stateGT(2)));
+        for (auto& robot : this->robots) {
+            x.push_back(robot.stateGT(0));
+            y.push_back(robot.stateGT(1));
+            u.push_back(std::cos(robot.stateGT(2)));
+            v.push_back(std::sin(robot.stateGT(2)));
         }
 
         // Plot the robot's position and heading using a quiver plot
@@ -54,26 +75,24 @@ void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilt
 
     if (plotEkfEstimation) {
         // Plot all the robots:
-        std::vector<double> x;
-        std::vector<double> y;
-        std::vector<double> u;
-        std::vector<double> v;
+        std::vector<float> x;
+        std::vector<float> y;
+        std::vector<float> u;
+        std::vector<float> v;
 
         // Components of the heading vector
-
-        for (std::vector<Robot>::iterator it = this->robots.begin(); it != this->robots.end(); ++it) {
-            x.push_back(it->ekf.state(0));
-            y.push_back(it->ekf.state(1));
-            u.push_back(std::cos(it->ekf.state(2)));
-            v.push_back(std::sin(it->ekf.state(2)));
+        for (auto& robot : this->robots) {
+            x.push_back(robot.ekf.state(0));
+            y.push_back(robot.ekf.state(1));
+            u.push_back(std::cos(robot.ekf.state(2)));
+            v.push_back(std::sin(robot.ekf.state(2)));
             Eigen::Matrix2f ellipseCov;
-            ellipseCov << it->ekf.covMatrix(0, 0), it->ekf.covMatrix(0, 1),
-                          it->ekf.covMatrix(1, 0), it->ekf.covMatrix(1, 1);
-            plotEllipse(it->ekf.state(0), it->ekf.state(1), ellipseCov);
+            ellipseCov << robot.ekf.covMatrix(0, 0), robot.ekf.covMatrix(0, 1),
+                          robot.ekf.covMatrix(1, 0), robot.ekf.covMatrix(1, 1);
+            plotEllipse(robot.ekf.state(0), robot.ekf.state(1), ellipseCov);
         }
 
         // Plot the robot's position and heading using a quiver plot
-        
         plt::quiver(x, y, u, v);
         PyRun_SimpleString(
             "import matplotlib.pyplot as plt\n"
@@ -92,26 +111,44 @@ void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilt
         std::vector<float> quality;
 
         // Components of the heading vector
-
-        for (std::vector<Robot>::iterator robotPtr = this->robots.begin(); robotPtr != this->robots.end(); ++robotPtr) {
-            for (std::vector<Eigen::Vector3f>::iterator particlePtr = robotPtr->pf.stateParticles.begin(); particlePtr != robotPtr->pf.stateParticles.end(); ++particlePtr) {
-                x.push_back((*particlePtr)(0));
-                y.push_back((*particlePtr)(1));
-                u.push_back(std::cos((*particlePtr)(2)));
-                v.push_back(std::sin((*particlePtr)(2)));
-                // quality.push_back(likelyhoodToGetMeasurementGpsCompassFromState(this->getMeasurement(*robotPtr), *particlePtr));
-                std::cout << likelyhoodToGetMeasurementGpsCompassFromState(this->getMeasurement(*robotPtr), *particlePtr) << std::endl;
+        for (auto& robot : this->robots) {
+            for (auto& particle : robot.pf.stateParticles) {
+                x.push_back(particle(0));
+                y.push_back(particle(1));
+                u.push_back(std::cos(particle(2)));
+                v.push_back(std::sin(particle(2)));
+                double qual = likelyhoodToGetMeasurementGpsCompassFromState(this->getMeasurement(robot), particle);
+                quality.push_back(qual);
             }
         }
 
+        // Normalize quality values to [0, 1] range for color mapping
+        std::vector<float> normalizedQuality = normalize(quality);
+
+        // Create a colormap based on the normalized quality values
+        std::vector<std::string> colors;
+        for (float normQual : normalizedQuality) {
+            int r = static_cast<int>(255 * (1 - normQual));
+            int g = 0;
+            int b = static_cast<int>(255 * normQual);
+            char color[8];
+            snprintf(color, sizeof(color), "#%02x%02x%02x", r, g, b);
+            colors.push_back(std::string(color));
+        }
+
         // Plot the robot's position and heading using a quiver plot
-        
         plt::quiver(x, y, u, v);
+
+        std::string colorList = vectorToPythonListString(colors);
+
         PyRun_SimpleString(
-            "import matplotlib.pyplot as plt\n"
-            "quiver = plt.gca().collections[-1]\n"
-            "quiver.set_color('red')\n"
-            "quiver.set_linewidth(0.01)\n"
+            ("import matplotlib.pyplot as plt\n"
+             "import numpy as np\n"
+             "quiver = plt.gca().collections[-1]\n"
+             "colors = " + colorList + "\n"
+             "quiver.set_color(colors)\n"
+             "quiver.set_cmap('coolwarm')\n"
+             "plt.colorbar(quiver)\n").c_str()
         );
     }
 
@@ -123,8 +160,8 @@ void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilt
     plt::ylabel("Y position");
     // Show the plot
     plt::show();
-    return;
 }
+
 
 void World::addRobotGroundTruth(Robot robot) {
     robots.push_back(robot);
