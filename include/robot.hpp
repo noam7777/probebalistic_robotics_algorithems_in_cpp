@@ -13,6 +13,7 @@
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include "parameters.hpp"
+#include "particle_filter.hpp"
 
 //=====================================================================================================================
 // TYPE DEFINITION
@@ -34,6 +35,7 @@ class Robot {
     public:
     Eigen::Vector3f expectedMeasurement(Eigen::Vector3f state);
     Ekf ekf;
+    ParticleFilter pf;
     Eigen::Vector3f stateGT;
     Robot(Eigen::Vector3f initialState)
         : stateGT(initialState) {}

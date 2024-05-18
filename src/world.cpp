@@ -1,24 +1,8 @@
 #include <world.hpp>
 #include "matplotlibcpp.h"
 #include <Python.h>
-#include <random>
-
 
 namespace plt = matplotlibcpp;
-
-float getRandomNumber(void) {
-    // Create a random number generator and seed it with a random device
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-
-    // Define the range for the random numbers
-    static std::uniform_real_distribution<> dis(0.0, 1.0);
-
-    // Generate a random number
-    float random_number = dis(gen);
-    return random_number;
-}
-
 
 static inline void plotEllipse(float x, float y, const Eigen::Matrix2f& cov) {
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix2f> eigenSolver(cov);
