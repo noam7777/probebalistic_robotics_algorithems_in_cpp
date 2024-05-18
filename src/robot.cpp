@@ -47,17 +47,16 @@ void Robot::Ekf::init(Eigen::Vector3f initialState) {
     float initalCovariancesTheta = 1.0f;
     float processNoiseXY = 1.0f;
     float processNoiseTheta = 1.0f;
-    float measurementNoiseXY = 10.0f;
-    float measurementNoiseTheta = 10.0f;
+
 
     this->state = initialState;
-    this->covMatrix << initalCovariancesXY, 0.0f, 0.0f,
-                        0.0f, initalCovariancesXY, 0.0f,
-                        0.0f, 0.0f, initalCovariancesTheta;
+    this->covMatrix << INITIAL_STATE_UNCERTAINTY_XY, 0.0f, 0.0f,
+                        0.0f, INITIAL_STATE_UNCERTAINTY_XY, 0.0f,
+                        0.0f, 0.0f, INITIAL_STATE_UNCERTAINTY_THETA;
     this->processNoise << processNoiseXY, 0.0f, 0.0f, 
                             0.0f, processNoiseXY, 0.0f,
                             0.0f, 0.0f, processNoiseTheta;
-    this->measurementNoise << measurementNoiseXY, 0.0f, 0.0f,
-                                0.0f, measurementNoiseXY, 0.0f,
-                                0.0f, 0.0f, measurementNoiseTheta;
+    this->measurementNoise << GPS_XY_VARIANCE, 0.0f, 0.0f,
+                                0.0f, GPS_XY_VARIANCE, 0.0f,
+                                0.0f, 0.0f, COMPASS_VARIANCE;
 }

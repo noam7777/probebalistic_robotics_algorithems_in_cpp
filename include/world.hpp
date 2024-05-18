@@ -24,7 +24,7 @@ class World {
     std::vector<Robot> robots;
 
     public:
-    void plotWorld(bool plotGt, bool PlotEkfEstimation);
+    void plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation);
     void addRobotGroundTruth(Robot robot);
     void cleanWorld(void);
     Eigen::Vector3f getMeasurement(Robot robot);

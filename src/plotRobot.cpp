@@ -22,6 +22,6 @@ int main()
         rob1.ekf.update(measurement);
         world.addRobotGroundTruth(rob1);
     }
-    world.plotWorld(true, true);
+    world.plotWorld(true, true, false);
     return 0;
 }
