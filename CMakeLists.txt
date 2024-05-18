@@ -39,16 +39,16 @@ file(GLOB sources src/*.cpp)
 include_directories(include)
 include_directories(/usr/include/python3.8)
 
-# # build robot sim with ekf
-# add_executable(plotRobot src/plotRobot.cpp src/world.cpp src/robot.cpp include/world.hpp include/robot.hpp include/parameters.hpp)
-# #target_include_directories(executableName ./include)
+# build robot sim with ekf
+add_executable(plotRobot_ekf src/plotRobot_ekf.cpp src/world.cpp src/robot.cpp include/world.hpp include/robot.hpp include/parameters.hpp)
+#target_include_directories(executableName ./include)
 
-# target_link_libraries(plotRobot
-#     ${Eigen_LIBRARIES}
-#     PRIVATE
-#         ${PYTHON_LIBRARIES}
-#         Python3::NumPy
-#     )
+target_link_libraries(plotRobot_ekf
+    ${Eigen_LIBRARIES}
+    PRIVATE
+        ${PYTHON_LIBRARIES}
+        Python3::NumPy
+    )
 
 # #build robot sim with particle filter
 add_executable(plotRobot_particle_filter src/plotRobot_particle_filter.cpp  include/parameters.hpp

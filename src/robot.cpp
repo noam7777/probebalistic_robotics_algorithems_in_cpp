@@ -50,13 +50,13 @@ void Robot::Ekf::init(Eigen::Vector3f initialState) {
 
 
     this->state = initialState;
-    this->covMatrix << INITIAL_STATE_UNCERTAINTY_XY, 0.0f, 0.0f,
-                        0.0f, INITIAL_STATE_UNCERTAINTY_XY, 0.0f,
-                        0.0f, 0.0f, INITIAL_STATE_UNCERTAINTY_THETA;
+    this->covMatrix << EKF_INITIAL_STATE_UNCERTAINTY_XY, 0.0f, 0.0f,
+                        0.0f, EKF_INITIAL_STATE_UNCERTAINTY_XY, 0.0f,
+                        0.0f, 0.0f, EKF_INITIAL_STATE_UNCERTAINTY_THETA;
     this->processNoise << processNoiseXY, 0.0f, 0.0f, 
                             0.0f, processNoiseXY, 0.0f,
                             0.0f, 0.0f, processNoiseTheta;
-    this->measurementNoise << GPS_XY_VARIANCE, 0.0f, 0.0f,
-                                0.0f, GPS_XY_VARIANCE, 0.0f,
-                                0.0f, 0.0f, COMPASS_VARIANCE;
+    this->measurementNoise << EKF_GPS_XY_VARIANCE, 0.0f, 0.0f,
+                                0.0f, EKF_GPS_XY_VARIANCE, 0.0f,
+                                0.0f, 0.0f, EKF_COMPASS_VARIANCE;
 }

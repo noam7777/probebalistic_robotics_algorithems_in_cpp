@@ -6,13 +6,13 @@ int main()
     // Eigen::Vector2f robotPos;
     World world;
     Eigen::Vector3f initialState;
-    initialState << 4.0f, 4.0f, 0.0f;
+    initialState << 50.0f, 10.0f, 0.0f;
     Robot rob1 = Robot(initialState);
     
     rob1.ekf.init(initialState);
-    world.addRobotGroundTruth(rob1);
+    world.addRobotToArchive(rob1);
 
-    for (int i = 0; i<5 ;i++) {
+    for (int i = 0; i<15 ;i++) {
         Eigen::Vector2f u;
         u << 3.0f, 0.2f;
         rob1.step(u);
@@ -20,7 +20,7 @@ int main()
         rob1.ekf.prediction(u);
         Eigen::Vector3f measurement = world.getMeasurement(rob1);
         rob1.ekf.update(measurement);
-        world.addRobotGroundTruth(rob1);
+        world.addRobotToArchive(rob1);
     }
     world.plotWorld(true, true, false);
     return 0;

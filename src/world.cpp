@@ -52,6 +52,7 @@ std::string vectorToPythonListString(const std::vector<std::string>& vec) {
     return result;
 }
 
+
 void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation) {
 
     if (plotGt) {
@@ -108,33 +109,32 @@ void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilt
         std::vector<float> y;
         std::vector<float> u;
         std::vector<float> v;
-        std::vector<float> quality;
+        std::vector<std::string> colors;
 
         // Components of the heading vector
         for (auto& robot : this->robots) {
-            for (auto& particle : robot.pf.stateParticles) {
-                x.push_back(particle(0));
-                y.push_back(particle(1));
-                u.push_back(std::cos(particle(2)));
-                v.push_back(std::sin(particle(2)));
-                double qual = likelyhoodToGetMeasurementGpsCompassFromState(this->getMeasurement(robot), particle);
-                quality.push_back(qual);
+            std::vector<float> quality;
+            for (auto& particle : robot.pf.particles) {
+                x.push_back(particle.state(0));
+                y.push_back(particle.state(1));
+                u.push_back(std::cos(particle.state(2)));
+                v.push_back(std::sin(particle.state(2)));
+                quality.push_back(particle.weight);
+            }
+            // Normalize quality values to [0, 1] range for color mapping
+            std::vector<float> normalizedQuality = normalize(quality);
+
+            // Create a colormap based on the normalized quality values
+            for (float normQual : normalizedQuality) {
+                int r = static_cast<int>(255 * (1 - normQual));
+                int g = 0;
+                int b = static_cast<int>(255 * normQual);
+                char color[8];
+                snprintf(color, sizeof(color), "#%02x%02x%02x", r, g, b);
+                colors.push_back(std::string(color));
             }
         }
 
-        // Normalize quality values to [0, 1] range for color mapping
-        std::vector<float> normalizedQuality = normalize(quality);
-
-        // Create a colormap based on the normalized quality values
-        std::vector<std::string> colors;
-        for (float normQual : normalizedQuality) {
-            int r = static_cast<int>(255 * (1 - normQual));
-            int g = 0;
-            int b = static_cast<int>(255 * normQual);
-            char color[8];
-            snprintf(color, sizeof(color), "#%02x%02x%02x", r, g, b);
-            colors.push_back(std::string(color));
-        }
 
         // Plot the robot's position and heading using a quiver plot
         plt::quiver(x, y, u, v);
@@ -163,7 +163,7 @@ void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilt
 }
 
 
-void World::addRobotGroundTruth(Robot robot) {
+void World::addRobotToArchive(Robot robot) {
     robots.push_back(robot);
 }
 
