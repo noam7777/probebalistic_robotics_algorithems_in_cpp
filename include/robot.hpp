@@ -36,7 +36,7 @@ class Robot {
     Eigen::Vector3f expectedMeasurement(Eigen::Vector3f state);
     Ekf ekf;
     ParticleFilter pf;
-    Eigen::Vector3f stateGT;
+    Eigen::Vector3f stateGT;                // the ground truth location and orientation of the robot
     Robot(Eigen::Vector3f initialState)
         : stateGT(initialState) {}
     void step(Eigen::Vector2f u);

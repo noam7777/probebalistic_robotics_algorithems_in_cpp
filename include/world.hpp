@@ -19,15 +19,22 @@
 
 class World {
     private:
-    int width = WORLD_WIDTH;
-    int height = WORLD_HEIGHT;
+    int width;
+    int height;
     std::vector<Robot> robots;
+    Eigen::Vector2f lendMark;
 
     public:
-    void plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation);
+    void plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation, bool plotLandmark);
     void addRobotToArchive(Robot robot);
     void cleanWorld(void);
-    Eigen::Vector3f getMeasurement(Robot robot);
+    Eigen::Vector3f getGpsCompassMeasurement(Robot robot);
+    float getRangeFromLandmarkMeasurement(Robot robot);
+    World(void) {
+        width = WORLD_WIDTH;
+        height = WORLD_HEIGHT;
+        lendMark << LANDMARK_LOCATION_X, LANDMARK_LOCATION_Y;
+    }
 };
 
 //=====================================================================================================================

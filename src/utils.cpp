@@ -74,6 +74,19 @@ float multivariateGaussian(const Eigen::VectorXf x, const Eigen::VectorXf mean, 
     return normFactor * std::exp(exponent);
 }
 
+float gaussian1D(float x, float mean, float variance) {
+    static const float PI = 3.14159265358979323846;
+    
+    // Calculate the normalization factor
+    float normFactor = 1.0 / std::sqrt(2 * PI * variance);
+    
+    // Calculate the exponent term
+    float diff = x - mean;
+    float exponent = -0.5 * (diff * diff) / variance;
+    
+    // Calculate the final Gaussian value
+    return normFactor * std::exp(exponent);
+}
 
 float likelyhoodToGetMeasurementGpsCompassFromState(Eigen::Vector3f gpsCompassMeasurement, Eigen::Vector3f state) {
     Eigen::Matrix3f gpsCompassCov;
@@ -82,4 +95,13 @@ float likelyhoodToGetMeasurementGpsCompassFromState(Eigen::Vector3f gpsCompassMe
                      0.0f, 0.0f, EKF_COMPASS_VARIANCE;
 
     return multivariateGaussian(state, gpsCompassMeasurement, gpsCompassCov);
+}
+
+float likelyhoodToGetMeasurementRangeFromLandmark(float rangeFromLandmarkMeasurement, Eigen::Vector3f state) {
+    Eigen::Vector2f landmarkLocation;
+    Eigen::Vector2f robotLocation;
+    landmarkLocation << LANDMARK_LOCATION_X, LANDMARK_LOCATION_Y;
+    robotLocation << state[0] , state[1];
+    float predictedRangeFromLandmark = (landmarkLocation - robotLocation).norm();
+    return gaussian1D(rangeFromLandmarkMeasurement ,predictedRangeFromLandmark, PARTICLE_FILTER_RANGE_FROM_LANDMARK_UNCERTAINTY);
 }

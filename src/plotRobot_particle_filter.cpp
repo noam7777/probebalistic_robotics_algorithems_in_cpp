@@ -27,23 +27,28 @@ int main()
     Eigen::Vector3f initialState;
     initialState << 50.0f, 6.0f, 0.0f;
     Robot rob1 = Robot(initialState);
-    int particleCount = 10;
+    int particleCount = 100;
 
     rob1.pf.init(initialState, particleCount, PF_INITIAL_STATE_UNCERTAINTY_XY, PF_INITIAL_STATE_UNCERTAINTY_THETA);
     world.addRobotToArchive(rob1);
 
-    for (int i = 0; i<20 ;i++) {
+    for (int i = 0; i<40 ;i++) {
         Eigen::Vector2f u;
-        u << 6.0f, 0.2f;
+        u << 6.0f, (0.15f - (0.01 * i));
         rob1.step(u);
-        u << 6.0f, 0.0f;
+        // u << 6.0f, 0.0f;
+        // use gps and compass to locelize the robot
+        // Eigen::Vector3f gpsCompassMeasurement = world.getGpsCompassMeasurement(rob1);
+        // rob1.pf.predictionSampleAndUpdateWeights(u,  gpsCompassMeasurement);
+        // rob1.pf.predictionSampleAndUpdateWeights(u,  gpsCompassMeasurement);
 
-        Eigen::Vector3f gpsCompassMeasurement = world.getMeasurement(rob1);
-        rob1.pf.predictionSampleAndUpdateWeights(u,  gpsCompassMeasurement);
+        // use range from landmark to locelize the robot
+        float rangeFromLandmarkMeasurement = world.getRangeFromLandmarkMeasurement(rob1);
+        rob1.pf.predictionSampleAndUpdateWeights(u,  rangeFromLandmarkMeasurement, rob1.stateGT[2]);
         rob1.pf.lowVarianceSampler();
         world.addRobotToArchive(rob1);
     }
 
-    world.plotWorld(true, false, true);
+    world.plotWorld(true, false, true, true);
     return 0;
 }

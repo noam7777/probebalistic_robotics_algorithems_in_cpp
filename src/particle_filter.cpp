@@ -43,16 +43,30 @@ void ParticleFilter::init(Eigen::Vector3f initialState, int particleCount, float
 //         this->sumOfWeights += particle.weight;
 //     }
 // }
+
+
 void ParticleFilter::predictionSampleAndUpdateWeights(Eigen::Vector2f u, Eigen::Vector3f gpsCompassMeasurement) { // with random noise at the control input
     this->sumOfWeights = 0;
     for (auto& particle : this->particles) {
-        particle.state(2) += ((u(1) + (getRandomNumber()-0.5f) * 2.0f * PF_RANDOM_CONTROL_NOISE_LINEAR) * DT_SEC);
-        particle.state(0) += ((u(0) + (getRandomNumber()-0.5f) * 2.0f * PF_RANDOM_CONTROL_NOISE_LINEAR) * DT_SEC * cosf(particle.state(2)));
-        particle.state(1) += ((u(0) + (getRandomNumber()-0.5f) * 2.0f * PF_RANDOM_CONTROL_NOISE_ANGULAR) * DT_SEC * sinf(particle.state(2)));
+            particle.state(2) += ((u(1) + (getRandomNumber()-0.5f) * 2.0f * PF_RANDOM_CONTROL_NOISE_ANGULAR) * DT_SEC);
+            particle.state(0) += ((u(0) + (getRandomNumber()-0.5f) * 2.0f * PF_RANDOM_CONTROL_NOISE_LINEAR) * DT_SEC * cosf(particle.state(2)));
+            particle.state(1) += ((u(0) + (getRandomNumber()-0.5f) * 2.0f * PF_RANDOM_CONTROL_NOISE_LINEAR) * DT_SEC * sinf(particle.state(2)));
         particle.weight = likelyhoodToGetMeasurementGpsCompassFromState(gpsCompassMeasurement, particle.state);
         this->sumOfWeights += particle.weight;
     }
 }
+
+void ParticleFilter::predictionSampleAndUpdateWeights(Eigen::Vector2f u, float rangeFromLandmark, float orientationGT) { // using range from Landmark as measurement
+    this->sumOfWeights = 0;
+    for (auto& particle : this->particles) {
+        particle.state(2) = orientationGT;
+        particle.state(0) += ((u(0) + (getRandomNumber()-0.5f) * 2.0f * PF_RANDOM_CONTROL_NOISE_LINEAR) * DT_SEC * cosf(particle.state(2))) + ((getRandomNumber()-0.5f) * 2 * PF_RANDOM_POSITION_NOISE * DT_SEC);
+        particle.state(1) += ((u(0) + (getRandomNumber()-0.5f) * 2.0f * PF_RANDOM_CONTROL_NOISE_LINEAR) * DT_SEC * sinf(particle.state(2))) + ((getRandomNumber()-0.5f) * 2 * PF_RANDOM_POSITION_NOISE * DT_SEC);
+        particle.weight = likelyhoodToGetMeasurementRangeFromLandmark(rangeFromLandmark, particle.state);
+        this->sumOfWeights += particle.weight;
+    }
+}
+
 
 void ParticleFilter::lowVarianceSampler(void) {
     if (this->sumOfWeights != 0.0f) {

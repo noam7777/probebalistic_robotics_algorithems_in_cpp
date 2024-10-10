@@ -31,5 +31,6 @@ class ParticleFilter {
     float sumOfWeights;
     void init(Eigen::Vector3f initialState, int particleCount, float posVariance, float angleVariance);
     void predictionSampleAndUpdateWeights(Eigen::Vector2f u, Eigen::Vector3f gpsCompassMeasurement);
+    void predictionSampleAndUpdateWeights(Eigen::Vector2f u, float rangeFromLandmark, float orientationGT);
     void lowVarianceSampler(void);
 };

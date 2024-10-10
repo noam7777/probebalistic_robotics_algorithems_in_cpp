@@ -18,10 +18,10 @@ int main()
         rob1.step(u);
         u << 4.0f, 0.0f;
         rob1.ekf.prediction(u);
-        Eigen::Vector3f measurement = world.getMeasurement(rob1);
+        Eigen::Vector3f measurement = world.getGpsCompassMeasurement(rob1);
         rob1.ekf.update(measurement);
         world.addRobotToArchive(rob1);
     }
-    world.plotWorld(true, true, false);
+    world.plotWorld(true, true, false, false);
     return 0;
 }

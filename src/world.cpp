@@ -53,7 +53,7 @@ std::string vectorToPythonListString(const std::vector<std::string>& vec) {
 }
 
 
-void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation) {
+void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation, bool plotLandmark) {
 
     if (plotGt) {
         // Plot all the robots:
@@ -152,6 +152,24 @@ void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilt
         );
     }
 
+
+if (plotLandmark) {
+    // Assuming landmark positions are stored in this->landmark (Eigen::Vector2f or similar)
+    std::vector<float> landmark_x;
+    std::vector<float> landmark_y;
+
+    landmark_x.push_back(this->lendMark[0]);  // X-coordinate of landmark
+    landmark_y.push_back(this->lendMark[1]);  // Y-coordinate of landmark
+
+    // Create a dictionary for keyword arguments (marker style and color)
+    std::unordered_map<std::string, std::string> keywords;
+    keywords["marker"] = "s";  // "s" for square
+    keywords["color"] = "g";   // "g" for green
+
+    // Plot the landmark as green square scatter point
+    plt::scatter(landmark_x, landmark_y, 100.0, keywords);
+}
+
     // Customize the plot
     plt::xlim(0, this->width);
     plt::ylim(0, this->height);
@@ -171,6 +189,15 @@ void World::cleanWorld(void) {
     this->robots.clear();
 }
 
-Eigen::Vector3f World::getMeasurement(Robot robot) {
+Eigen::Vector3f World::getGpsCompassMeasurement(Robot robot) {
+
     return robot.stateGT;
 }
+float World::getRangeFromLandmarkMeasurement(Robot robot) {
+    Eigen::Vector2f robotPos;
+    robotPos << robot.stateGT[0], robot.stateGT[1];
+    float rangeFromLandmark = (robotPos - this->lendMark).norm();
+
+    return rangeFromLandmark;
+}
+
