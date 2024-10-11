@@ -13,6 +13,7 @@
 #define DT_SEC 1.0
 #define WORLD_WIDTH 200
 #define WORLD_HEIGHT 200
+#define WORLD_TOTAL_TIME_STEPS 40
 
 // ekf:
 // measurement noises:

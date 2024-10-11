@@ -153,22 +153,22 @@ void World::plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilt
     }
 
 
-if (plotLandmark) {
-    // Assuming landmark positions are stored in this->landmark (Eigen::Vector2f or similar)
-    std::vector<float> landmark_x;
-    std::vector<float> landmark_y;
+    if (plotLandmark) {
+        // Assuming landmark positions are stored in this->landmark (Eigen::Vector2f or similar)
+        std::vector<float> landmark_x;
+        std::vector<float> landmark_y;
 
-    landmark_x.push_back(this->lendMark[0]);  // X-coordinate of landmark
-    landmark_y.push_back(this->lendMark[1]);  // Y-coordinate of landmark
+        landmark_x.push_back(this->lendMark[0]);  // X-coordinate of landmark
+        landmark_y.push_back(this->lendMark[1]);  // Y-coordinate of landmark
 
-    // Create a dictionary for keyword arguments (marker style and color)
-    std::unordered_map<std::string, std::string> keywords;
-    keywords["marker"] = "s";  // "s" for square
-    keywords["color"] = "g";   // "g" for green
+        // Create a dictionary for keyword arguments (marker style and color)
+        std::unordered_map<std::string, std::string> keywords;
+        keywords["marker"] = "s";  // "s" for square
+        keywords["color"] = "g";   // "g" for green
 
-    // Plot the landmark as green square scatter point
-    plt::scatter(landmark_x, landmark_y, 100.0, keywords);
-}
+        // Plot the landmark as green square scatter point
+        plt::scatter(landmark_x, landmark_y, 100.0, keywords);
+    }
 
     // Customize the plot
     plt::xlim(0, this->width);
@@ -201,3 +201,116 @@ float World::getRangeFromLandmarkMeasurement(Robot robot) {
     return rangeFromLandmark;
 }
 
+void World::animateRobotStates(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation, bool plotLandmark) {
+    // Iterate over the chronological robot states in the `this->robots` vector
+    for (int frameIdx = 0; frameIdx < this->robots.size(); ++frameIdx) {  
+        // Clear the current plot
+        plt::clf();
+
+        // Plot ground truth if enabled
+        if (plotGt) {
+            std::vector<float> x, y, u, v;
+
+            // Extract the robot state for this time step
+            Robot& robot = this->robots[frameIdx];
+            x.push_back(robot.stateGT(0));
+            y.push_back(robot.stateGT(1));
+            u.push_back(std::cos(robot.stateGT(2)));
+            v.push_back(std::sin(robot.stateGT(2)));
+
+            // Plot the robot's position and heading
+            plt::quiver(x, y, u, v);
+        }
+
+        // Plot EKF estimation if enabled
+        if (plotEkfEstimation) {
+            std::vector<float> x, y, u, v;
+
+            // Extract the robot EKF state for this time step
+            Robot& robot = this->robots[frameIdx];
+            x.push_back(robot.ekf.state(0));
+            y.push_back(robot.ekf.state(1));
+            u.push_back(std::cos(robot.ekf.state(2)));
+            v.push_back(std::sin(robot.ekf.state(2)));
+
+            Eigen::Matrix2f ellipseCov;
+            ellipseCov << robot.ekf.covMatrix(0, 0), robot.ekf.covMatrix(0, 1),
+                          robot.ekf.covMatrix(1, 0), robot.ekf.covMatrix(1, 1);
+
+            // Plot the EKF covariance ellipse
+            plotEllipse(robot.ekf.state(0), robot.ekf.state(1), ellipseCov);
+
+            // Plot the robot's EKF estimated position and heading
+            plt::quiver(x, y, u, v);
+            PyRun_SimpleString(
+                "import matplotlib.pyplot as plt\n"
+                "quiver = plt.gca().collections[-1]\n"
+                "quiver.set_color('red')\n"
+                "quiver.set_linewidth(0.01)\n"
+            );
+        }
+
+        // Plot particle filter estimation if enabled
+        if (plotParticleFilterEstimation) {
+            std::vector<float> x, y, u, v;
+            std::vector<std::string> colors;
+
+            // Extract the robot particle filter state for this time step
+            Robot& robot = this->robots[frameIdx];
+
+            std::vector<float> quality;
+            for (auto& particle : robot.pf.particles) {
+                x.push_back(particle.state(0));
+                y.push_back(particle.state(1));
+                u.push_back(std::cos(particle.state(2)));
+                v.push_back(std::sin(particle.state(2)));
+                quality.push_back(particle.weight);
+            }
+
+            std::vector<float> normalizedQuality = normalize(quality);
+            for (float normQual : normalizedQuality) {
+                int r = static_cast<int>(255 * (1 - normQual));
+                int b = static_cast<int>(255 * normQual);
+                char color[8];
+                snprintf(color, sizeof(color), "#%02x00%02x", r, b);
+                colors.push_back(std::string(color));
+            }
+
+            plt::quiver(x, y, u, v);
+            std::string colorList = vectorToPythonListString(colors);
+            PyRun_SimpleString(
+                ("import matplotlib.pyplot as plt\n"
+                 "quiver = plt.gca().collections[-1]\n"
+                 "colors = " + colorList + "\n"
+                 "quiver.set_color(colors)\n"
+                 "quiver.set_cmap('coolwarm')\n"
+                 "plt.colorbar(quiver)\n").c_str()
+            );
+        }
+
+        // Plot the landmark if enabled
+        if (plotLandmark) {
+            std::vector<float> landmark_x, landmark_y;
+            landmark_x.push_back(this->lendMark[0]);
+            landmark_y.push_back(this->lendMark[1]);
+
+            std::unordered_map<std::string, std::string> keywords;
+            keywords["marker"] = "s";
+            keywords["color"] = "g";
+            plt::scatter(landmark_x, landmark_y, 100.0, keywords);
+        }
+
+        // Customize the plot
+        plt::xlim(0, this->width);
+        plt::ylim(0, this->height);
+        plt::title("Robot Position and Heading (Frame " + std::to_string(frameIdx) + ")");
+        plt::xlabel("X position");
+        plt::ylabel("Y position");
+
+        // Pause briefly to create the animation effect
+        plt::pause(0.1);  // Adjust the pause duration for smoother animation
+    }
+
+    // Keep the plot window open after the animation
+    plt::show();
+}

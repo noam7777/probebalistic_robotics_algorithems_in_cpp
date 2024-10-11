@@ -25,7 +25,9 @@ class World {
     Eigen::Vector2f lendMark;
 
     public:
+    
     void plotWorld(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation, bool plotLandmark);
+    void animateRobotStates(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation, bool plotLandmark);
     void addRobotToArchive(Robot robot);
     void cleanWorld(void);
     Eigen::Vector3f getGpsCompassMeasurement(Robot robot);

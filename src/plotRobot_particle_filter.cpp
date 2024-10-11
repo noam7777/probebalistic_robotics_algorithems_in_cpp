@@ -49,6 +49,7 @@ int main()
         world.addRobotToArchive(rob1);
     }
 
-    world.plotWorld(true, false, true, true);
+    // world.plotWorld(true, false, true, true);
+    world.animateRobotStates(true, false, true, true);
     return 0;
 }

@@ -12,7 +12,7 @@ int main()
     rob1.ekf.init(initialState);
     world.addRobotToArchive(rob1);
 
-    for (int i = 0; i<15 ;i++) {
+    for (int i = 0; i< WORLD_TOTAL_TIME_STEPS;i++) {
         Eigen::Vector2f u;
         u << 3.0f, 0.2f;
         rob1.step(u);
