@@ -24,12 +24,14 @@ int main()
 {
     // Eigen::Vector2f robotPos;
     World world;
-    Eigen::Vector3f initialState;
-    initialState << 50.0f, 6.0f, 0.0f;
-    Robot rob1 = Robot(initialState);
+    Eigen::Vector3f initialStateGT, initialStateEstimationMean;
+    initialStateGT << ROBOT_INTIAL_STATE_X, ROBOT_INTIAL_STATE_Y, ROBOT_INTIAL_STATE_THETA;
+    initialStateEstimationMean = initialStateGT;
+
+    Robot rob1 = Robot(initialStateGT);
     int particleCount = 100;
 
-    rob1.pf.init(initialState, PF_PARTICLE_COUNT, PF_INITIAL_STATE_UNCERTAINTY_XY, PF_INITIAL_STATE_UNCERTAINTY_THETA);
+    rob1.pf.init(initialStateGT, PF_PARTICLE_COUNT, PF_INITIAL_STATE_UNCERTAINTY_XY, PF_INITIAL_STATE_UNCERTAINTY_THETA);
     world.addRobotToArchive(rob1);
 
     for (int i = 0; i<WORLD_TOTAL_TIME_STEPS ;i++) {
