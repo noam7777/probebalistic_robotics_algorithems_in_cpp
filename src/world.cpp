@@ -201,6 +201,21 @@ float World::getRangeFromLandmarkMeasurement(Robot robot) {
     return rangeFromLandmark;
 }
 
+void plotCircle(float centerX, float centerY, float radius) {
+    const int numPoints = 100;  // Number of points to create a smooth circle
+    std::vector<float> circleX(numPoints), circleY(numPoints);
+
+    for (int i = 0; i < numPoints; ++i) {
+        float angle = 2 * M_PI * i / numPoints;
+        circleX[i] = centerX + radius * std::cos(angle);
+        circleY[i] = centerY + radius * std::sin(angle);
+    }
+
+    plt::plot(circleX, circleY, "b-");  // Plot circle with a blue line
+}
+
+
+
 void World::animateRobotStates(bool plotGt, bool plotEkfEstimation, bool plotParticleFilterEstimation, bool plotLandmark) {
     // Iterate over the chronological robot states in the `this->robots` vector
     for (int frameIdx = 0; frameIdx < this->robots.size(); ++frameIdx) {  
@@ -288,7 +303,7 @@ void World::animateRobotStates(bool plotGt, bool plotEkfEstimation, bool plotPar
             );
         }
 
-        // Plot the landmark if enabled
+        // Plot the landmark, circle, and line if enabled
         if (plotLandmark) {
             std::vector<float> landmark_x, landmark_y;
             landmark_x.push_back(this->lendMark[0]);
@@ -298,6 +313,17 @@ void World::animateRobotStates(bool plotGt, bool plotEkfEstimation, bool plotPar
             keywords["marker"] = "s";
             keywords["color"] = "g";
             plt::scatter(landmark_x, landmark_y, 100.0, keywords);
+
+            // Plot the circle around the landmark
+            Robot& robot = this->robots[frameIdx];  // Get current robot state
+            float radius = std::sqrt(std::pow(robot.stateGT(0) - this->lendMark[0], 2) + 
+                                     std::pow(robot.stateGT(1) - this->lendMark[1], 2));
+            plotCircle(this->lendMark[0], this->lendMark[1], radius);  // Call the custom plotCircle function
+
+            // Plot the line connecting the robot and the landmark
+            std::vector<float> line_x = {robot.stateGT(0), this->lendMark[0]};
+            std::vector<float> line_y = {robot.stateGT(1), this->lendMark[1]};
+            plt::plot(line_x, line_y, "k-");  // Thin black line
         }
 
         // Customize the plot
@@ -314,3 +340,5 @@ void World::animateRobotStates(bool plotGt, bool plotEkfEstimation, bool plotPar
     // Keep the plot window open after the animation
     plt::show();
 }
+
+
