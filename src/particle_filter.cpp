@@ -87,3 +87,22 @@ void ParticleFilter::lowVarianceSampler(void) {
         this->particles = newParticleSamples;
     }
 }
+
+void ParticleFilter::uniformRadialSampler(float Range) {
+    if (PF_UNIFORM_RADIAL_SAMPLER_SAMPLER_COUNT != 0) {
+        // int newParticleCount = 0;
+        int particleSelectorInterval = ((PF_PARTICLE_COUNT) / (PF_UNIFORM_RADIAL_SAMPLER_SAMPLER_COUNT));
+        // float particleSelector = static_cast<int>(std::floor(getRandomNumber() * (float)particleSelectorInterval));
+
+        for (int numParticle = 0; numParticle < PF_UNIFORM_RADIAL_SAMPLER_SAMPLER_COUNT; numParticle++) {
+            int particleIndex = static_cast<int>(numParticle * particleSelectorInterval);
+            float theta = (2 * M_PI) / ((float)PF_UNIFORM_RADIAL_SAMPLER_SAMPLER_COUNT) * ((float)numParticle)/* +randomAngle */;
+            float posX = Range * std::cos(theta);
+            float posY = Range * std::sin(theta);
+            
+            this->particles[particleIndex].state[0] = Range * std::cos(theta) + LANDMARK_LOCATION_X;
+            this->particles[particleIndex].state[1] = Range * std::sin(theta) + LANDMARK_LOCATION_Y;
+            this->particles[particleIndex].weight = 0.0f;
+        }
+    }
+}

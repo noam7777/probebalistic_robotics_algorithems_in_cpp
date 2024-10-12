@@ -33,4 +33,5 @@ class ParticleFilter {
     void predictionSampleAndUpdateWeights(Eigen::Vector2f u, Eigen::Vector3f gpsCompassMeasurement);
     void predictionSampleAndUpdateWeights(Eigen::Vector2f u, float rangeFromLandmark, float orientationGT);
     void lowVarianceSampler(void);
+    void uniformRadialSampler(float Range);
 };
