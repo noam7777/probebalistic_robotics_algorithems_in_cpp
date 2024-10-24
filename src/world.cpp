@@ -203,6 +203,13 @@ float World::getRangeFromLandmarkMeasurement(Robot robot) {
     return rangeFromLandmark;
 }
 
+
+float World::getRssiMeasurementFromLandmark(Robot robot) {
+    float rangeFromLandmark = getRangeFromLandmarkMeasurement(robot);
+    float rssi = robot.rssiModelGT.calcRssiFromRange(rangeFromLandmark);
+    return rssi;
+}
+
 void plotCircle(float centerX, float centerY, float radius) {
     const int numPoints = 100;  // Number of points to create a smooth circle
     std::vector<float> circleX(numPoints), circleY(numPoints);

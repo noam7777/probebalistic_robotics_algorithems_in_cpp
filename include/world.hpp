@@ -32,6 +32,7 @@ class World {
     void cleanWorld(void);
     Eigen::Vector3f getGpsCompassMeasurement(Robot robot);
     float getRangeFromLandmarkMeasurement(Robot robot);
+    float getRssiMeasurementFromLandmark(Robot robot);
     World(void) {
         width = WORLD_WIDTH;
         height = WORLD_HEIGHT;

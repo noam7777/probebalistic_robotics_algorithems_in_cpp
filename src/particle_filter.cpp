@@ -24,10 +24,13 @@ void ParticleFilter::init(Eigen::Vector3f initialState, int particleCount, float
     for (int i = 0; i< this->particlesCount; i++)
     {
         Eigen::Vector3f randomParticleState;
-        Particle randParticle;
-        randParticle.state << generateGaussianRandom(initialState(0), posVariance),
-                              generateGaussianRandom(initialState(1), posVariance),
-                              generateGaussianRandom(initialState(2), angleVariance);
+        randomParticleState << generateGaussianRandom(initialState(0), posVariance),
+                               generateGaussianRandom(initialState(1), posVariance),
+                               generateGaussianRandom(initialState(2), angleVariance);
+        RssiModel rssiModel(RSSI_D0, RSSI_DEFAULT_PL, RSSI_PT, RSSI_DEFAULT_N);  // Example initialization of RssiModel
+
+        Particle randParticle(randomParticleState, rssiModel);
+
         this->particles.push_back(randParticle);
     }
     return;
@@ -44,7 +47,7 @@ void ParticleFilter::init(Eigen::Vector3f initialState, int particleCount, float
 //     }
 // }
 
-
+#ifdef PF_SIM_USE_GPS_AND_COMPASS_MEASUREMENTS
 void ParticleFilter::predictionSampleAndUpdateWeights(Eigen::Vector2f u, Eigen::Vector3f gpsCompassMeasurement) { // with random noise at the control input
     this->sumOfWeights = 0;
     for (auto& particle : this->particles) {
@@ -55,7 +58,8 @@ void ParticleFilter::predictionSampleAndUpdateWeights(Eigen::Vector2f u, Eigen::
         this->sumOfWeights += particle.weight;
     }
 }
-
+#endif
+#ifdef PF_SIM_USE_DIRECT_RANGE_MEASUREMENTS
 void ParticleFilter::predictionSampleAndUpdateWeights(Eigen::Vector2f u, float rangeFromLandmark, float orientationGT) { // using range from Landmark as measurement
     this->sumOfWeights = 0;
     for (auto& particle : this->particles) {
@@ -66,8 +70,20 @@ void ParticleFilter::predictionSampleAndUpdateWeights(Eigen::Vector2f u, float r
         this->sumOfWeights += particle.weight;
     }
 }
+#endif
+void ParticleFilter::predictionSampleAndUpdateWeightsWithRssiMeasurement(Eigen::Vector2f u, float rssi, float orientationGT) {
+    this->sumOfWeights = 0;
+    for (auto& particle : this->particles) {
+        particle.state(2) = orientationGT;
+        particle.state(0) += ((u(0) + (getRandomNumber()-0.5f) * 2.0f * PF_RANDOM_CONTROL_NOISE_LINEAR) * DT_SEC * cosf(particle.state(2))) + ((getRandomNumber()-0.5f) * 2 * PF_RANDOM_POSITION_NOISE * DT_SEC);
+        particle.state(1) += ((u(0) + (getRandomNumber()-0.5f) * 2.0f * PF_RANDOM_CONTROL_NOISE_LINEAR) * DT_SEC * sinf(particle.state(2))) + ((getRandomNumber()-0.5f) * 2 * PF_RANDOM_POSITION_NOISE * DT_SEC);
+        particle.weight = particle.likelyhoodToGetRssiMeasurementFromLandmark(rssi);
+        this->sumOfWeights += particle.weight;
+    }
+}
 
 
+#ifdef PF_SIM_USE_DIRECT_RANGE_MEASUREMENTS
 void ParticleFilter::lowVarianceSampler(void) {
     if (this->sumOfWeights != 0.0f) {
         int newParticleCount = 0;
@@ -105,4 +121,17 @@ void ParticleFilter::uniformRadialSampler(float Range) {
             this->particles[particleIndex].weight = 0.0f;
         }
     }
+}
+
+#endif
+
+float Particle::likelyhoodToGetRssiMeasurementFromLandmark(float rssiMeasurement) {
+    Eigen::Vector2f landmarkLocation;
+    Eigen::Vector2f particleLocation;
+    landmarkLocation << LANDMARK_LOCATION_X, LANDMARK_LOCATION_Y;
+    particleLocation << this->state[0] , this->state[1];
+    float predictedRangeFromLandmark = (landmarkLocation - particleLocation).norm();
+    // here we might want to calculate the expected rssi from the predictedRangeFromLandmark and compare it to the rssiMeasurement with a gaussian1D 
+    float rangeFromLandmarkCalculatedFromRssi = this->rssiModel.calcRangeFromRssi(rssiMeasurement);
+    return gaussian1D(rangeFromLandmarkCalculatedFromRssi ,predictedRangeFromLandmark, PF_RANGE_FROM_LANDMARK_UNCERTAINTY);
 }

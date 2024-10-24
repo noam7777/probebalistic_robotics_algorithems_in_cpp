@@ -14,6 +14,7 @@
 #include <eigen3/Eigen/Dense>
 #include "parameters.hpp"
 #include "particle_filter.hpp"
+#include "rssi_model.hpp"
 
 //=====================================================================================================================
 // TYPE DEFINITION
@@ -36,8 +37,9 @@ class Robot {
     Eigen::Vector3f expectedMeasurement(Eigen::Vector3f state);
     Ekf ekf;
     ParticleFilter pf;
+    RssiModel rssiModelGT;
     Eigen::Vector3f stateGT;                // the ground truth location and orientation of the robot
-    Robot(Eigen::Vector3f initialState)
-        : stateGT(initialState) {}
+    Robot(Eigen::Vector3f initialState, RssiModel rssiModel)
+        : stateGT(initialState), rssiModelGT(rssiModel) {}
     void step(Eigen::Vector2f u);
-    };
+};

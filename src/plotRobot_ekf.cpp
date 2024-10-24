@@ -3,6 +3,8 @@
 
 int main()
 {
+#ifdef PF_SIM_USE_GPS_AND_COMPASS_MEASUREMENTS
+
     // Eigen::Vector2f robotPos;
     World world;
     Eigen::Vector3f initialState;
@@ -24,4 +26,5 @@ int main()
     }
     world.plotWorld(true, true, false, false);
     return 0;
+#endif
 }

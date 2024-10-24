@@ -87,7 +87,7 @@ float gaussian1D(float x, float mean, float variance) {
     // Calculate the final Gaussian value
     return normFactor * std::exp(exponent);
 }
-
+#ifdef PF_SIM_USE_GPS_AND_COMPASS_MEASUREMENTS
 float likelyhoodToGetMeasurementGpsCompassFromState(Eigen::Vector3f gpsCompassMeasurement, Eigen::Vector3f state) {
     Eigen::Matrix3f gpsCompassCov;
     gpsCompassCov << EKF_GPS_XY_VARIANCE, 0.0f, 0.0f,
@@ -96,7 +96,8 @@ float likelyhoodToGetMeasurementGpsCompassFromState(Eigen::Vector3f gpsCompassMe
 
     return multivariateGaussian(state, gpsCompassMeasurement, gpsCompassCov);
 }
-
+#endif
+#ifdef PF_SIM_USE_DIRECT_RANGE_MEASUREMENTS
 float likelyhoodToGetMeasurementRangeFromLandmark(float rangeFromLandmarkMeasurement, Eigen::Vector3f state) {
     Eigen::Vector2f landmarkLocation;
     Eigen::Vector2f robotLocation;
@@ -105,3 +106,5 @@ float likelyhoodToGetMeasurementRangeFromLandmark(float rangeFromLandmarkMeasure
     float predictedRangeFromLandmark = (landmarkLocation - robotLocation).norm();
     return gaussian1D(rangeFromLandmarkMeasurement ,predictedRangeFromLandmark, PF_RANGE_FROM_LANDMARK_UNCERTAINTY);
 }
+#endif
+

@@ -51,4 +51,14 @@
 #define PF_INITIAL_STATE_Y                      300.0f
 #define PF_INITIAL_STATE_THETA                  4.5f
 #define PF_RANGE_FROM_LANDMARK_UNCERTAINTY 30.3f
+// #define PF_SIM_USE_GPS_AND_COMPASS_MEASUREMENTS
+// #define PF_SIM_USE_DIRECT_RANGE_MEASUREMENTS
+#define PF_SIM_USE_RSSI_MEASUREMENTS
 
+#define RSSI_D0 10 // reference range
+#define RSSI_PL 1.0f  // path loss at reference range
+#define RSSI_PT 32.0f // power of transmission
+#define RSSI_N  2.0f  // transmission loss exponent
+
+#define RSSI_DEFAULT_PL 1.0f // initial guess for the path loss at reference range
+#define RSSI_DEFAULT_N 2.0f // initial guess for the transmission loss exponent
