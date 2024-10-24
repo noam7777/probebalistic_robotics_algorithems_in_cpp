@@ -196,8 +196,10 @@ Eigen::Vector3f World::getGpsCompassMeasurement(Robot robot) {
 float World::getRangeFromLandmarkMeasurement(Robot robot) {
     Eigen::Vector2f robotPos;
     robotPos << robot.stateGT[0], robot.stateGT[1];
+    
     float rangeFromLandmark = (robotPos - this->lendMark).norm();
-
+    rangeFromLandmark = (rangeFromLandmark * LANDMARK_RANGE_ERROR_SCALE) + LANDMARK_RANGE_ERROR_BIAS;
+    rangeFromLandmark = std::max(rangeFromLandmark, 0.5f);
     return rangeFromLandmark;
 }
 

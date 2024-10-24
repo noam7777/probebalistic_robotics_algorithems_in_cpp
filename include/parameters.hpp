@@ -11,12 +11,16 @@
 //=====================================================================================================================
 
 #define DT_SEC 1.0
-#define WORLD_WIDTH 800
-#define WORLD_HEIGHT 800
+#define WORLD_WIDTH 1100
+#define WORLD_HEIGHT 1000
 #define WORLD_TOTAL_TIME_STEPS 400
 
 #define LANDMARK_LOCATION_X 400.0f
 #define LANDMARK_LOCATION_Y 350.0f
+// #define LANDMARK_RANGE_ERROR_BIAS -30.0f
+// #define LANDMARK_RANGE_ERROR_SCALE 0.8f
+#define LANDMARK_RANGE_ERROR_BIAS 30.0f
+#define LANDMARK_RANGE_ERROR_SCALE 0.8f
 
 #define ROBOT_INTIAL_STATE_X 150.0f
 #define ROBOT_INTIAL_STATE_Y 110.0f
@@ -46,4 +50,5 @@
 #define PF_INITIAL_STATE_X                      300.0f
 #define PF_INITIAL_STATE_Y                      300.0f
 #define PF_INITIAL_STATE_THETA                  4.5f
-#define PARTICLE_FILTER_RANGE_FROM_LANDMARK_UNCERTAINTY 30.3f
+#define PF_RANGE_FROM_LANDMARK_UNCERTAINTY 30.3f
+

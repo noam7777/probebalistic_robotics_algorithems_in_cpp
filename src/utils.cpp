@@ -103,5 +103,5 @@ float likelyhoodToGetMeasurementRangeFromLandmark(float rangeFromLandmarkMeasure
     landmarkLocation << LANDMARK_LOCATION_X, LANDMARK_LOCATION_Y;
     robotLocation << state[0] , state[1];
     float predictedRangeFromLandmark = (landmarkLocation - robotLocation).norm();
-    return gaussian1D(rangeFromLandmarkMeasurement ,predictedRangeFromLandmark, PARTICLE_FILTER_RANGE_FROM_LANDMARK_UNCERTAINTY);
+    return gaussian1D(rangeFromLandmarkMeasurement ,predictedRangeFromLandmark, PF_RANGE_FROM_LANDMARK_UNCERTAINTY);
 }
